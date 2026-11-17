@@ -1,0 +1,134 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model Adventure {
+  id            String   @id @default(cuid())
+  title         String
+  genre         String
+  level         String
+  style         String
+  variety       String   @default("latam")
+  length        String   @default("medium")
+  characterName String
+  premise       String   @default("")
+  summary       String   @default("")
+  summarizedThrough Int  @default(-1)
+  worldState    String   @default("{}")
+  sceneTitle    String   @default("")
+  chapter       Int      @default(1)
+  turnCount     Int      @default(0)
+  status        String   @default("active")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  characters   Character[]
+  turns        Turn[]
+  corrections  Correction[]
+  tutorMessages TutorMessage[]
+}
+
+model Character {
+  id          String    @id @default(cuid())
+  adventureId String
+  adventure   Adventure @relation(fields: [adventureId], references: [id], onDelete: Cascade)
+  name        String
+  description String    @default("")
+  voiceId     String
+  createdAt   DateTime  @default(now())
+
+  @@unique([adventureId, name])
+}
+
+model Turn {
+  id          String    @id @default(cuid())
+  adventureId String
+  adventure   Adventure @relation(fields: [adventureId], references: [id], onDelete: Cascade)
+  idx         Int
+  role        String // player | narrator
+  segments    String // JSON: [{speaker, text, kind: narration|dialogue}]
+  vocab       String    @default("[]") // JSON: [{es, en}]
+  analyzed    Boolean   @default(false)
+  chapter     Int       @default(1)
+  createdAt   DateTime  @default(now())
+
+  corrections  Correction[]
+  observations CategoryObservation[]
+
+  @@index([adventureId, idx])
+}
+
+model Correction {
+  id                String    @id @default(cuid())
+  adventureId       String
+  adventure         Adventure @relation(fields: [adventureId], references: [id], onDelete: Cascade)
+  turnId            String
+  turn              Turn      @relation(fields: [turnId], references: [id], onDelete: Cascade)
+  original          String
+  corrected         String
+  changes           String    @default("[]") // JSON: [{from,to}]
+  category          String
+  kind              String    @default("error") // error | unnatural | style
+  explanation       String    @default("")
+  severity          Int       @default(2) // 1 minor .. 3 major
+  dismissed         Boolean   @default(false)
+  explanationViewed Boolean   @default(false)
+  saved             Boolean   @default(false)
+  practiced         Boolean   @default(false)
+  createdAt         DateTime  @default(now())
+  // spaced review
+  nextReviewAt      DateTime?
+  reviewStep        Int       @default(0)
+
+  attempts PracticeAttempt[]
+
+  @@index([category])
+  @@index([adventureId])
+}
+
+model PracticeAttempt {
+  id           String     @id @default(cuid())
+  correctionId String
+  correction   Correction @relation(fields: [correctionId], references: [id], onDelete: Cascade)
+  transcript   String
+  success      Boolean
+  matchRatio   Float
+  feedback     String     @default("")
+  isReview     Boolean    @default(false)
+  createdAt    DateTime   @default(now())
+}
+
+// Grammar categories the learner attempted in a turn, and whether they used them correctly.
+// Used for error rates relative to opportunities and tracking later unprompted correct usage.
+model CategoryObservation {
+  id        String   @id @default(cuid())
+  turnId    String
+  turn      Turn     @relation(fields: [turnId], references: [id], onDelete: Cascade)
+  category  String
+  correct   Boolean
+  createdAt DateTime @default(now())
+
+  @@index([category])
+}
+
+model TutorMessage {
+  id          String    @id @default(cuid())
+  adventureId String
+  adventure   Adventure @relation(fields: [adventureId], references: [id], onDelete: Cascade)
+  role        String // user | assistant
+  content     String
+  createdAt   DateTime  @default(now())
+}
+
+model VocabEntry {
+  id        String   @id @default(cuid())
+  es        String   @unique
+  en        String
+  seen      Int      @default(1)
+  firstSeen DateTime @default(now())
+}

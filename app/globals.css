@@ -1,0 +1,69 @@
+@import "tailwindcss";
+
+:root {
+  --background: #0d0a12;
+  --foreground: #efe6d8;
+  --card: #17121f;
+  --card-foreground: #efe6d8;
+  --popover: #1b1525;
+  --muted: #221b2c;
+  --muted-foreground: #a29a94;
+  --border: #2f2639;
+  --input: #2f2639;
+  --primary: #e0a24a;
+  --primary-foreground: #1a1208;
+  --accent: #b4532a;
+  --ring: #e0a24a;
+  --success: #6fbf8b;
+  --danger: #e0685a;
+  --radius: 0.75rem;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-accent: var(--accent);
+  --color-ring: var(--ring);
+  --color-success: var(--success);
+  --color-danger: var(--danger);
+  --font-sans: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-serif: var(--font-serif), Georgia, "Times New Roman", serif;
+  --radius-lg: var(--radius);
+}
+
+html { color-scheme: dark; }
+
+body {
+  background:
+    radial-gradient(1200px 600px at 80% -10%, rgba(180, 83, 42, 0.18), transparent 60%),
+    radial-gradient(900px 500px at 0% 0%, rgba(88, 60, 140, 0.18), transparent 60%),
+    var(--background);
+  background-attachment: fixed;
+  color: var(--foreground);
+  font-family: var(--font-sans), system-ui, sans-serif;
+  min-height: 100dvh;
+}
+
+.font-display { font-family: var(--font-serif), Georgia, serif; letter-spacing: 0.01em; }
+
+@keyframes rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+.animate-rise { animation: rise 0.4s ease-out both; }
+@keyframes pulse-ring { 0% { box-shadow: 0 0 0 0 rgba(224, 104, 90, 0.55); } 100% { box-shadow: 0 0 0 16px rgba(224, 104, 90, 0); } }
+.recording { animation: pulse-ring 1.2s ease-out infinite; }
+@keyframes flicker { 0%, 100% { opacity: 1; } 50% { opacity: 0.55; } }
+.animate-flicker { animation: flicker 1.4s ease-in-out infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-rise, .recording, .animate-flicker { animation: none; }
+}
+
+::selection { background: rgba(224, 162, 74, 0.35); }
